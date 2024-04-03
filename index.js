@@ -14,6 +14,11 @@ app.get("/api/todo", (req, res) => {
   res.send(response);
 });
 
+app.get("/api/todo/:idParam", (req, res) => {
+  const response = db.query(`SELECT * FROM todos where id=?`, [req.params.idParam]);
+  res.send(response);
+});
+
 app.post("/api/todo", (req, res) => {
   const todo = req.body.todo;
   db.run(`INSERT INTO TODOS(todo,author) values(? , ?)`, [
