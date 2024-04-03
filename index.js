@@ -21,6 +21,12 @@ app.get("/api/todo/:idParam", (req, res) => {
   const response = db.query(`SELECT * FROM todos WHERE id=?`, [
     req.params.idParam,
   ]);
+  if (response.length == 0) {
+    res.status(404);
+    res.send({
+      message: "not found"
+    });
+  }
   res.send(response);
 });
 
@@ -31,7 +37,9 @@ app.post("/api/todo", (req, res) => {
   } catch (err) {
     console.log(err.message);
     res.status(400);
-    res.send(err.message);
+    res.send({
+      message: err.message
+    });
   }
   db.run(`INSERT INTO todos(todo,author) VALUES(? , ?)`, [
     body.todo.content,
