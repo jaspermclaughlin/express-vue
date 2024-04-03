@@ -1,4 +1,5 @@
 const express = require('express')
+const db = require('./db');
 const app = express()
 const port = 3000
 
@@ -8,15 +9,14 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-const todos = []
-
 app.get('/api/todo', (req, res) => {
-  res.send(todos)
+  const response = db.query(`SELECT * FROM todos`, []);
+  res.send(response)
 })
 
 app.post('/api/todo', (req, res) => {
   const todo = req.body.todo
-  todos.push(todo)
+  db.run(`INSERT INTO TODOS(todo,author) values(? , ?)`, [todo.content, todo.author])
   res.status(201)
   res.send()
 })
