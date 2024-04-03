@@ -1,10 +1,23 @@
 <script setup>
-import { ref, reactive, watch } from "vue";
+import { ref, reactive, watch, onMounted } from "vue";
+import axios from "axios";
 
-const todos = reactive(["Jasper: Kochen", "Daniel: Backen", "Mariel: Wischen"]);
+const todos = reactive([]);
 const selected = ref("");
 const content = ref("");
 const author = ref("");
+
+onMounted(async () => {
+  await axios.get("http://localhost:3000/api/todo").then((response) => {
+
+    for (const element of response.data) {
+      const fullTodo = `${element.author}: ${element.todo}`;
+      if (!todos.includes(fullTodo)) {
+        todos.push(fullTodo);
+      }
+    }
+  });
+});
 
 watch(selected, (todo) => {
   [author.value, content.value] = todo.split(": ");
@@ -12,7 +25,7 @@ watch(selected, (todo) => {
 
 function create() {
   if (hasValidInput()) {
-    const fullTodo = `${author.value}, ${content.value}`;
+    const fullTodo = `${author.value}: ${content.value}`;
     if (!todos.includes(fullTodo)) {
       todos.push(fullTodo);
       content.value = author.value = "";
