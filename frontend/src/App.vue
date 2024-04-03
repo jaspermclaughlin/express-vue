@@ -1,57 +1,52 @@
-<!--
-https://eugenkiss.github.io/7guis/tasks/#crud
--->
-
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch } from "vue";
 
-const names = reactive(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
-const selected = ref('')
-const first = ref('')
-const last = ref('')
+const todos = reactive(["Jasper: Kochen", "Daniel: Backen", "Mariel: Wischen"]);
+const selected = ref("");
+const content = ref("");
+const author = ref("");
 
-watch(selected, (name) => {
-  [last.value, first.value] = name.split(', ')
-})
+watch(selected, (todo) => {
+  [author.value, content.value] = todo.split(": ");
+});
 
 function create() {
   if (hasValidInput()) {
-    const fullName = `${last.value}, ${first.value}`
-    if (!names.includes(fullName)) {
-      names.push(fullName)
-      first.value = last.value = ''
+    const fullTodo = `${author.value}, ${content.value}`;
+    if (!todos.includes(fullTodo)) {
+      todos.push(fullTodo);
+      content.value = author.value = "";
     }
   }
 }
 
 function update() {
   if (hasValidInput() && selected.value) {
-    const i = names.indexOf(selected.value)
-    names[i] = selected.value = `${last.value}, ${first.value}`
+    const i = todos.indexOf(selected.value);
+    todos[i] = selected.value = `${author.value}: ${content.value}`;
   }
 }
 
 function del() {
   if (selected.value) {
-    const i = names.indexOf(selected.value)
-    names.splice(i, 1)
-    selected.value = first.value = last.value = ''
+    const i = todos.indexOf(selected.value);
+    todos.splice(i, 1);
+    selected.value = content.value = author.value = "";
   }
 }
 
 function hasValidInput() {
-  return first.value.trim() && last.value.trim()
+  return content.value.trim() && author.value.trim();
 }
 </script>
 
 <template>
-
   <select size="5" v-model="selected">
-    <option v-for="name in names" :key="name">{{ name }}</option>
+    <option v-for="todo in todos" :key="todo">{{ todo }}</option>
   </select>
 
-  <label>Name: <input v-model="first"></label>
-  <label>Surname: <input v-model="last"></label>
+  <label>ToDo Content: <input v-model="content" /></label>
+  <label>Author: <input v-model="author" /></label>
 
   <div class="buttons">
     <button @click="create">Create</button>
