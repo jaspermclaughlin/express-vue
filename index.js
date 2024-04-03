@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("./db");
+const validator = require("./validator");
 const app = express();
 const port = 3000;
 
@@ -17,26 +18,50 @@ app.get("/api/todo", (req, res) => {
 
 //GET ONE
 app.get("/api/todo/:idParam", (req, res) => {
-  const response = db.query(`SELECT * FROM todos where id=?`, [
+  const response = db.query(`SELECT * FROM todos WHERE id=?`, [
     req.params.idParam,
   ]);
   res.send(response);
 });
 
 app.post("/api/todo", (req, res) => {
-  const todo = req.body.todo;
-  db.run(`INSERT INTO TODOS(todo,author) values(? , ?)`, [
-    todo.content,
-    todo.author,
+  const body = req.body;
+  try {
+    validator.validateBody(body);
+  } catch (err) {
+    console.log(err.message);
+    res.status(400);
+    res.send(err.message);
+  }
+  db.run(`INSERT INTO todos(todo,author) VALUES(? , ?)`, [
+    body.todo.content,
+    body.todo.author,
   ]);
   res.status(201);
-  res.send();
+  res.send({
+    message: "Todo created successfully!",
+  });
 });
 
 app.delete("/api/todo/:idParam", (req, res) => {
-  db.run("DELETE FROM TODOS where id=?", [req.params.idParam]);
+  db.run("DELETE FROM todos WHERE id=?", [req.params.idParam]);
   res.status(200);
-  res.send();
+  res.send({
+    message: "Todo deleted successfully!",
+  });
+});
+
+app.put("/api/todo/:idParam", (req, res) => {
+  const todo = req.body.todo;
+  db.run("UPDATE todos SET todo = ?, author = ? WHERE id=?", [
+    todo.content,
+    todo.author,
+    req.params.idParam,
+  ]);
+  res.status(201);
+  res.send({
+    message: "Todo updated successfully!",
+  });
 });
 
 app.listen(port, () => {
