@@ -8,7 +8,13 @@ const content = ref("");
 const author = ref("");
 const API_URL = "/api/todo";
 
-onMounted(async () => {
+onMounted(fetchAll);
+
+watch(selected, (todo) => {
+  [author.value, content.value] = todo.split(": ");
+});
+
+async function fetchAll() {
   await axios
     .get(API_URL)
     .then((response) => {
@@ -22,13 +28,9 @@ onMounted(async () => {
     .catch((error) => {
       console.error(error);
     });
-});
+}
 
-watch(selected, (todo) => {
-  [author.value, content.value] = todo.split(": ");
-});
-
-function create() {
+async function create() {
   if (hasValidInput()) {
     const fullTodo = `${author.value}: ${content.value}`;
     if (!todos.includes(fullTodo)) {
