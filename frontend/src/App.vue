@@ -6,10 +6,10 @@ const todos = reactive([]);
 const selected = ref("");
 const content = ref("");
 const author = ref("");
+const API_URL = "/api/todo";
 
 onMounted(async () => {
-  await axios.get("http://localhost:3000/api/todo").then((response) => {
-
+  await axios.get(API_URL).then((response) => {
     for (const element of response.data) {
       const fullTodo = `${element.author}: ${element.todo}`;
       if (!todos.includes(fullTodo)) {
