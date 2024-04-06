@@ -34,7 +34,10 @@ async function create() {
   if (hasValidInput()) {
     const fullTodo = `${author.value}: ${content.value}`;
     if (!todos.includes(fullTodo)) {
-      todos.push(fullTodo);
+      await axios.post(API_URL, {
+        todo: { author: author.value, content: content.value },
+      });
+      await fetchAll()
       content.value = author.value = "";
     }
   }
