@@ -3,15 +3,16 @@ import { ref, reactive, watch, onMounted } from "vue";
 import axios from "axios";
 
 const todos = reactive([]);
-const selected = ref("");
+const selectedId = ref("");
 const content = ref("");
 const author = ref("");
 const API_URL = "/api/todo";
 
 onMounted(fetchAll);
 
-watch(selected, (todo) => {
-  [author.value, content.value] = todo.split(": ");
+watch(selectedId, (todoId) => {
+  const selectedTodo = todos.filter((todo) => todo.id == todoId)[0];
+  [author.value, content.value] = [selectedTodo.author, selectedTodo.todo];
 });
 
 async function fetchAll() {
@@ -19,10 +20,7 @@ async function fetchAll() {
     .get(API_URL)
     .then((response) => {
       for (const element of response.data) {
-        const fullTodo = `${element.author}: ${element.todo}`;
-        if (!todos.includes(fullTodo)) {
-          todos.push(fullTodo);
-        }
+        todos.push(element);
       }
     })
     .catch((error) => {
@@ -30,31 +28,38 @@ async function fetchAll() {
     });
 }
 
+function todoAlreadyExists() {
+  for (var  i = 0;  i < todos.length; i++) {
+    if (todos[i].author == author.value && todos[i].todo == content.value) {
+      return true;
+    }
+  }
+}
+
 async function create() {
   if (hasValidInput()) {
-    const fullTodo = `${author.value}: ${content.value}`;
-    if (!todos.includes(fullTodo)) {
+    if (!todoAlreadyExists()) {
       await axios.post(API_URL, {
         todo: { author: author.value, content: content.value },
       });
-      await fetchAll()
+      await fetchAll();
       content.value = author.value = "";
     }
   }
 }
 
 function update() {
-  if (hasValidInput() && selected.value) {
-    const i = todos.indexOf(selected.value);
-    todos[i] = selected.value = `${author.value}: ${content.value}`;
+  if (hasValidInput() && selectedId.value) {
+    const i = todos.indexOf(selectedId.value);
+    todos[i] = selectedId.value = `${author.value}: ${content.value}`;
   }
 }
 
 function del() {
-  if (selected.value) {
-    const i = todos.indexOf(selected.value);
+  if (selectedId.value) {
+    const i = todos.indexOf(selectedId.value);
     todos.splice(i, 1);
-    selected.value = content.value = author.value = "";
+    selectedId.value = content.value = author.value = "";
   }
 }
 
@@ -64,8 +69,10 @@ function hasValidInput() {
 </script>
 
 <template>
-  <select size="5" v-model="selected">
-    <option v-for="todo in todos" :key="todo">{{ todo }}</option>
+  <select size="30" v-model="selectedId">
+    <option v-for="todo in todos" :key="todo" :value="todo.id">
+      {{ todo.author }}: {{ todo.todo }}
+    </option>
   </select>
 
   <label>ToDo Content: <input v-model="content" /></label>
