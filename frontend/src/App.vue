@@ -19,6 +19,7 @@ async function fetchAll() {
   await axios
     .get(API_URL)
     .then((response) => {
+      todos.length = 0;
       for (const element of response.data) {
         todos.push(element);
       }
@@ -28,8 +29,8 @@ async function fetchAll() {
     });
 }
 
-function todoAlreadyExists() {
-  for (var  i = 0;  i < todos.length; i++) {
+function todoExists() {
+  for (var i = 0; i < todos.length; i++) {
     if (todos[i].author == author.value && todos[i].todo == content.value) {
       return true;
     }
@@ -38,7 +39,7 @@ function todoAlreadyExists() {
 
 async function create() {
   if (hasValidInput()) {
-    if (!todoAlreadyExists()) {
+    if (!todoExists()) {
       await axios.post(API_URL, {
         todo: { author: author.value, content: content.value },
       });
@@ -55,11 +56,13 @@ function update() {
   }
 }
 
-function del() {
-  if (selectedId.value) {
-    const i = todos.indexOf(selectedId.value);
-    todos.splice(i, 1);
-    selectedId.value = content.value = author.value = "";
+// Cannot reset selectedId value; leads to error. Don't know why
+async function del() {
+  if (selectedId.value && todoExists()) {
+    await axios.delete(`${API_URL}/${selectedId.value}`);
+    await fetchAll();
+    author.value = content.value = "";
+    // selectedId.value = ""; 
   }
 }
 
