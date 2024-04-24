@@ -3,11 +3,42 @@ const db = require("./db");
 const validator = require("./validator");
 const app = express();
 const port = 3000;
+const crypto = require("crypto");
 
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+//From: https://stackoverflow.com/questions/23616371/basic-http-authentication-with-node-and-express-4/33905671#33905671
+app.use((req, res, next) => {
+  const auth = {
+    login: "admin",
+    hashedPassword:
+      "b04047fbbd9dd9b4fd8ce3bed0a513a7e7de0de285aa57613dede051f8877edd",
+  };
+
+  const b64auth = (req.headers.authorization || "").split(" ")[1] || "";
+  const [login, password] = Buffer.from(b64auth, "base64")
+    .toString()
+    .split(":");
+  const hashedPassword = crypto
+    .createHash("sha256")
+    .update(password)
+    .digest("hex");
+
+  if (
+    login &&
+    hashedPassword &&
+    login === auth.login &&
+    hashedPassword === auth.hashedPassword
+  ) {
+    return next();
+  }
+
+  res.set("WWW-Authenticate", 'Basic realm="401"');
+  res.status(401).send("Authentication required.");
 });
 
 //GET ALL
