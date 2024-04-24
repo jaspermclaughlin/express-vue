@@ -110,9 +110,8 @@ select {
 
 .buttons {
   clear: both;
+  display: flex;
+  gap: 5px;
 }
 
-button + button {
-  margin-left: 5px;
-}
 </style>
