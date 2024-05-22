@@ -4,3 +4,11 @@ CREATE TABLE todos (
   author text NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username varchar(255) NOT NULL UNIQUE,
+  hashedPassword varchar(255) NOT NULL,
+  permissions varchar(255) NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
